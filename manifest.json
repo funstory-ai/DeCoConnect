@@ -1,0 +1,19 @@
+{
+  "name": "Janus",
+  "version": "0.1.0",
+  "description": "Find and mark translation errors.",
+  "permissions": ["tabs", "*://*.webnovel.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.webnovel.com/*"],
+      "js": ["janus.js"]
+    }
+  ],
+  "icons": {
+    "16": "images/janus_16.png",
+    "32": "images/janus_32.png",
+    "48": "images/janus_48.png",
+    "128": "images/janus_128.png"
+  },
+  "manifest_version": 2
+}
