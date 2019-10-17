@@ -5,8 +5,10 @@
   "permissions": ["tabs", "*://*.webnovel.com/*"],
   "content_scripts": [
     {
-      "matches": ["*://*.webnovel.com/*"],
-      "js": ["janus.js"]
+      "matches": ["*://*.babelnovel.com/*"],
+      "js": ["js/jquery-3.4.1.min.js", "js/side-comments.js", "js/janus.js"],
+      "css": ["css/side-comments.css", "css/themes/default-theme.css"],
+      "run_at": "document_end"
     }
   ],
   "icons": {
