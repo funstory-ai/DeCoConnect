@@ -11,7 +11,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       const tab = tabs[0];
       const url = tab.url;
       if (/^https?:\/\/(www\.)?babelnovel\.com\/books\/[a-z0-9\-]+\/chapters\//g.test(url)) {
-        alert('hi');
         chrome.tabs.executeScript({
           file: 'js/janus.js'
         });
