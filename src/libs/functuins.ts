@@ -1,8 +1,5 @@
-'use strict';
 
-// Initialize methods
-
-function getCurrentUser() {
+export function getCurrentUser() {
   // Demo data for now
   return {
     id: 1,
@@ -11,17 +8,17 @@ function getCurrentUser() {
   };
 }
 
-function getBook() {
+export function getBook() {
   return window.location.pathname.split(/books\/([a-z0-9\-]+)\/chapters/g)[1];
 }
 
-function getChapters() {
+export function getChapters() {
   return $("[class^=content-container__] > h1").text().split(/(C\d+)/g).filter(ch => ch);
 }
 
-function readExistingComments(book, chapters) {
+export function readExistingComments(book, chapters) {
   // Demo data for now
-  return chapters.reduce(function(acc, cur) {
+  return chapters.reduce(function (acc, cur) {
     return acc.concat([
       {
         "sectionId": `${cur}-1`,
@@ -52,13 +49,14 @@ function readExistingComments(book, chapters) {
   }, []);
 }
 
-function markCommentableSections () {
+export function markCommentableSections() {  
+  
   $("[class^=page-container__]").parent().attr("id", "commentable-area");
-  $("[class^=content-container__]").each(function() {
+  $("[class^=content-container__]").each(function () {
     const chapter = $(this).find("h1").text();
     const sections = $(this).find("pre").children();
     let idx = 1;
-    sections.each(function() {
+    sections.each(function () {
       const block = $(this);
       if (block.width() > 0 && block.height() > 0) {
         block.addClass("commentable-section");

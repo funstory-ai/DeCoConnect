@@ -1,0 +1,40 @@
+{
+  "name": "Janus",
+  "version": "0.1.0",
+  "description": "Find and mark translation errors.",
+  "manifest_version": 2,
+  "permissions": ["*://*.babelnovel.com/*", "tabs", "activeTab", "storage"],
+  "background": {
+    "scripts": ["js/vendor.js", "js/background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.babelnovel.com/books/*/chapters/*"],
+      "js": [
+        "assets/js/jquery-3.4.1.min.js",
+        "assets/js/side-comments.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.babelnovel.com/books/*/chapters/*"],
+      "js": ["js/vendor.js", "js/content_script.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  "browser_action": {
+    "default_icon": "assets/images/janus_16.png",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "assets/images/janus_16.png",
+    "32": "assets/images/janus_32.png",
+    "48": "assets/images/janus_48.png",
+    "128": "assets/images/janus_128.png"
+  }
+}

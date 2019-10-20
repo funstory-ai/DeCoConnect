@@ -3353,3 +3353,6 @@ require.alias("component-emitter/index.js", "side-comments/deps/emitter/index.js
 require.alias("component-emitter/index.js", "emitter/index.js");
 
 require.alias("side-comments/js/main.js", "side-comments/index.js");
+
+
+window.SideComments = require("side-comments")
