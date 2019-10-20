@@ -7,6 +7,7 @@ import {
   getBook,
   getChapters,
 } from './libs/functuins';
+// import { getSelection } from './libs/getError';
 
 declare global {
   interface Window {
@@ -59,7 +60,10 @@ function main(){
 
 }
 
-setTimeout(main, 3000)
+setTimeout(()=>{
+  main();
+  // getSelection();
+}, 3000)
 
 /*
 alert(currentUser);

@@ -15,6 +15,8 @@
     "url": "https://git.tuiwen-tech.com/translation-quality/janus"
   },
   "dependencies": {
+    "@types/crypto-js": "^3.1.43",
+    "crypto-js": "^3.1.9-1",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "side-comments": "aroc/side-comments#master"
