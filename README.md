@@ -8,6 +8,10 @@ Find and mark translation errors, Chrome Extension , TypeScript
 npm install
 ```
 
+Copy `config.sample.json` and rename it to `config.json`.
+
+Fill in the correct information.
+
 ## Develop
 
 ```cmd

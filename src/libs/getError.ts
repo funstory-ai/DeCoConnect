@@ -1,8 +1,8 @@
-import * as CryptoJS from 'crypto-js';
+import { save } from './saveData';
 
 export async function getSelection() {
   console.log('window loaded');
-  const txtdom = document.querySelectorAll('pre')[0];
+  const txtdom = window.document.querySelectorAll('pre')[0];
   console.log('content Dom', txtdom);
 
   if (txtdom) {
@@ -15,28 +15,23 @@ export async function getSelection() {
     // }
     // 清除 文本禁选
     txtdom.style.userSelect = 'text';
-    txtdom.onmouseup = async (event) => {
+    txtdom.onmouseup = async (event: any) => {
       console.log(event);
 
       const selectionObj: any = window.getSelection();
       const selectedParagraph: string = selectionObj.focusNode && selectionObj.focusNode.data;
       const txt = selectedParagraph.slice(selectionObj.anchorOffset, selectionObj.focusOffset);
       if (txt) {
-        // const hashdata = await digestMessage(selectedParagraph);
-        // 这里引了个库测试下hash库与浏览器原生的哈希结果是否一样
-        console.log(selectedParagraph, CryptoJS.SHA256(selectedParagraph).toString());
-        // console.log(hashdata);
-        console.log(txt);
-
+          save({
+            title: 'bookname',
+            user: 'zlk',
+            chapter: 'chapternum',
+            number: [selectionObj.anchorOffset, selectionObj.focusOffset],
+            content: selectedParagraph,
+            text: txt,
+          })
       }
     }
   }
-}
-
-export async function digestMessage(message: string) {
-  const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8); // hash the message
-  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-  return hashHex;
+  return true;
 }

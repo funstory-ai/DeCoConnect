@@ -2,11 +2,16 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
+    // "lib": [
+    //   "es6"
+    // ],
     "noImplicitAny": false,
     "sourceMap": false,
     "rootDir": "src",
     "outDir": "dist/js",
     "noEmitOnError": true,
+	  // "strict": true, /* enable all strict type-checking options */
+    "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"]
   }
 }
