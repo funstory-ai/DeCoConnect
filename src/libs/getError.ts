@@ -1,4 +1,4 @@
-import { save } from './saveData';
+import { save, get } from './saveData';
 
 export async function getSelection() {
   console.log('window loaded');
@@ -24,12 +24,15 @@ export async function getSelection() {
       if (txt) {
           save({
             title: 'bookname',
-            user: 'zlk',
+            user: 'lala',
             chapter: 'chapternum',
             number: [selectionObj.anchorOffset, selectionObj.focusOffset],
             content: selectedParagraph,
             text: txt,
           })
+        const list = await get('bookname','chapternum','zlk');
+        console.log(list);
+        
       }
     }
   }

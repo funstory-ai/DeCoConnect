@@ -2,7 +2,7 @@ import * as CryptoJS from 'crypto-js';
 import * as firebase from 'firebase';
 import * as config from '../config.json';
 
-export interface IerrorData {
+export interface ItextData {
   title: string;
   chapter: string;
   number: number[];
@@ -13,24 +13,27 @@ export interface IerrorData {
 
 export const firebaseApp = firebase.initializeApp(config.firebaseConfig);
 
-// firebaseApp.database().ref().once("value")
-//   .then(function (snapshot) {
-//     var key = snapshot.key; // null
-//     console.log('@@', key);
 
-//     console.log(snapshot.val());
-//     var childKey = snapshot.child("aa").key; // "ada"
-//     console.log(childKey);
+export async function get(bookname: string, chapternum:string, user?:string) {
+  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`)
+  let list: any[] = [];
+  if (user){
+    const res = await ref.orderByChild("user").equalTo(user).once("value");
+    list = res.val();
+  }else{
+    const res = await ref.once("value");
+    list = res.val();
+  }
+  return list;
+}
 
-//   });
-
-export function save(errorData:IerrorData){
+export function save(textData:ItextData){
 
   firebaseApp.database()
-    .ref(`${errorData.title.replace(/\s/, '')}_${errorData.chapter}_${errorData.user}`)
+    .ref(`${textData.title.replace(/\s/, '')}/${textData.chapter}`)
     .push({
-      ...errorData,
-      hash: CryptoJS.SHA256(errorData.content).toString(),
+      ...textData,
+      hash: CryptoJS.SHA256(textData.content).toString(),
     });
 
 }
