@@ -9,7 +9,6 @@ module.exports = {
     options: path.join(__dirname, srcDir + 'options.ts'),
     background: path.join(__dirname, srcDir + 'background.ts'),
     content_script: path.join(__dirname, srcDir + 'content_script.ts'),
-    content_css: path.join(__dirname, srcDir + './style/index.less')
   },
   output: {
     path: path.join(__dirname, '../dist/js'),

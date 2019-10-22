@@ -1,4 +1,5 @@
 import './style/index.less';
+import { windowLoaded } from './libs/utils';
 // import * as Jquery from 'jquery';
 import { 
   markCommentableSections,
@@ -8,29 +9,15 @@ import {
   getChapters,
 } from './libs/functuins';
 import { getSelection } from './libs/getError';
-
-declare global {
-  interface Window {
-    SideComments: any;
-    $: any;
-  }
-}
-
+import { showError } from './libs/showError';
 
 function main(){
-  
   markCommentableSections();
   const currentUser = getCurrentUser();
   const existingComments = readExistingComments(getBook(), getChapters());
-  
-  console.log(window.$);
-  
-  console.log($,$("[class^=page-container__]"));
-  
-  
+  // console.log($,$("[class^=page-container__]"));
   // Create a new SideComments instance, passing in the wrapper element and the optional the current user and any existing comments.
   const sideComments = new window.SideComments('#commentable-area', currentUser, existingComments);
-
   // console.log(window.SideComments, $('#commentable-area'));
   // Listen to "commentPosted", and send a request to your backend to save the comment.
   // More about this event in the "docs" section.
@@ -60,12 +47,16 @@ function main(){
 
 }
 
-setTimeout(()=>{
-  // main();
+async function init() {
+  await windowLoaded();
+  setTimeout(()=>{
+    main();
+  }, 3000)
+  
   getSelection();
-
-}, 3000)
-
+  showError();
+}
+init()
 /*
 alert(currentUser);
 

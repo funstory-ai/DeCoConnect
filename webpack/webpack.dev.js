@@ -3,6 +3,9 @@ const common = require('./webpack.common.js');
 const ExtensionReloader = require('webpack-extension-reloader');
 
 module.exports = merge(common, {
+  entry:{
+    content_css: './src/style/index.less',
+  },
   devtool: 'inline-source-map',
   watch: true,
   mode: 'development',

@@ -2,19 +2,12 @@ import * as CryptoJS from 'crypto-js';
 import * as firebase from 'firebase';
 import * as config from '../config.json';
 
-export interface ItextData {
-  title: string;
-  chapter: string;
-  number: number[];
-  content: string;
-  text: string;
-  user: string;
-}
+
 
 export const firebaseApp = firebase.initializeApp(config.firebaseConfig);
 
 
-export async function get(bookname: string, chapternum:string, user?:string) {
+export async function getData(bookname: string, chapternum:string, user?:string) {
   const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`)
   let list: any[] = [];
   if (user){
@@ -24,6 +17,8 @@ export async function get(bookname: string, chapternum:string, user?:string) {
     const res = await ref.once("value");
     list = res.val();
   }
+  // console.log('@@@', list);
+  
   return list;
 }
 
