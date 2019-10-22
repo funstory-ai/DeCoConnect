@@ -48,7 +48,7 @@ function main() {
 }
 
 async function init() {
-  await windowLoaded();
+  // await windowLoaded();
   setTimeout(()=>{
     main();
   }, 3000)
