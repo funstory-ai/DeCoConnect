@@ -1,18 +1,32 @@
 import * as database from './database';
-import { getBookInfo, getUser } from './utils';
+// import { utils.getBookInfo, utils.getUser } from './utils';
+import * as utils from './utils';
 import * as CryptoJS from 'crypto-js';
 
+let errorDataHash:any = {};
+let getDataDestory:any;
 
 export async function selection() {
   bindSelectEvent();
-  errorHighlight();
+  // await errorHighlight();
+  getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot:any)=>{
+    console.log('on child_added',dataSnapshot.val());
+    errorDataHash[`${new Date().getTime().toString(36)}`] = dataSnapshot.val()
+    errorHighlight(errorDataHash);
+  });
   // 每次更新页面后需要重新绑定DOM事件跟 错误高亮
   let observer = new MutationObserver(() => { 
-    console.log('@@');
+    // console.log('@@');
     setTimeout(()=>{
       bindSelectEvent();
-      errorHighlight();
-    },2000)
+      // errorHighlight();
+      getDataDestory()
+      getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
+        console.log('on child_added', dataSnapshot.val());
+        errorDataHash[`${new Date().getTime().toString(36)}`] = dataSnapshot.val()
+        errorHighlight(errorDataHash);
+      });
+    }, 1000)
   });
   observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
 }
@@ -30,6 +44,7 @@ export async function bindSelectEvent() {
       // 清除 文本禁选
       txtdom.style.userSelect = 'text';
       txtdom.onmouseup = async (event: any) => {
+        // console.log('@@onmouseup');
         // console.log(event);
         const selectionObj: any = window.getSelection();
         if (selectionObj.baseNode.data !== selectionObj.focusNode.data) {
@@ -43,15 +58,26 @@ export async function bindSelectEvent() {
           $(optionBox()).css({
             left: `${event.pageX}px`,
             top: `${event.pageY}px`
-          }).show();
+          }).empty().append(`
+            <div class="errorOption" check-data="1">G - wrong Gender of pronoun</div>
+            <div class="errorOption" check-data="2">IT - Inconsist ent Term</div>
+            <div class="errorOption" check-data="3">AAA - Abuse of Adjective / Adverb</div>
+            <div class="errorOption" check-data="4">IS - Incomplet e Sent ence</div>
+            <div class="errorOption" check-data="5">B - Bad t ranslat ion</div>
+          `).show();
           // 绑定选择点击事件
           $('.errorOption').click((event) => {
             hidebox();
-            const bookinfo = getBookInfo();
-            console.log(event.target.attributes['check-data'].value);
+            const bookinfo = utils.getBookInfo();
+            // 因为一页中可能同时出现两章内容，这边通过章节标题的文本来提取章号，而不是url里取
+            // console.log(selectionObj.focusNode.parentNode);
+            // console.log(selectionObj);
+            // const chapter = selectionObj.focusNode.parentNode.parentNode.parentNode.querySelector('h1').innerText.match(/[cC]\d+/)[0].toLowerCase();
+            // console.log(event.target.attributes['check-data'].value);
+            // console.log('@@click');
             database.save({
               title: bookinfo.title,
-              user: getUser(),
+              user: utils.getUser(),
               chapter: bookinfo.chapter,
               number: [selectionObj.anchorOffset, selectionObj.focusOffset],
               content: selectedParagraph,
@@ -67,9 +93,13 @@ export async function bindSelectEvent() {
 }
 
 // 筛选出有错误的段落，并高亮
-export async function errorHighlight() {
-  const { title, chapter } = getBookInfo();
-  const list = await database.getData(title, chapter, getUser());
+export async function errorHighlight(listCache?) {
+  const { title, chapter } = utils.getBookInfo();
+  let list = listCache;
+  if (!list){
+    // BUG 这边需要考虑到同时显示两章的情况
+    list = await database.getData(title, chapter, utils.getUser());
+  }
   if (!list) return;
   const hashObj = {};
   // dom节点按hash做成字典
@@ -86,6 +116,8 @@ export async function errorHighlight() {
       highlightText(hashObj[matchError.hash], matchError)
     }
   })
+  errorDataHash = list;
+  return list;
 }
 
 // 高亮段落中的错误
@@ -115,16 +147,17 @@ export function optionBox() {
   optionBoxDiv.id = 'optionBoxDiv'
   document.querySelector('body').append(optionBoxDiv)
   // $('body').append('<div id="janusOptionBox">Test</p>')
-  $('#optionBoxDiv').append(`
-    <div class="errorOption" check-data="1">G - wrong Gender of pronoun</div>
-    <div class="errorOption" check-data="2">IT - Inconsist ent Term</div>
-    <div class="errorOption" check-data="3">AAA - Abuse of Adjective / Adverb</div>
-    <div class="errorOption" check-data="4">IS - Incomplet e Sent ence</div>
-    <div class="errorOption" check-data="5">B - Bad t ranslat ion</div>
-  `);
+  // $('#optionBoxDiv').append(`
+  //   <div class="errorOption" check-data="1">G - wrong Gender of pronoun</div>
+  //   <div class="errorOption" check-data="2">IT - Inconsist ent Term</div>
+  //   <div class="errorOption" check-data="3">AAA - Abuse of Adjective / Adverb</div>
+  //   <div class="errorOption" check-data="4">IS - Incomplet e Sent ence</div>
+  //   <div class="errorOption" check-data="5">B - Bad t ranslat ion</div>
+  // `);
   return document.querySelector('#optionBoxDiv');
 }
 
+// 隐藏错误选择框
 function hidebox() {
   $(optionBox()).hide()//.empty();
 }

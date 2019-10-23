@@ -43,7 +43,7 @@ export function getCurrentUser() {
   };
 }
 
-export function getBook() {
+export function getBook(): string {
   return window.location.pathname.split(/books\/([a-z0-9\-]+)\/chapters/g)[1];
 }
 

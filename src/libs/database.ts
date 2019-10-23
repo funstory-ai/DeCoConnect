@@ -18,8 +18,15 @@ export async function getData(bookname: string, chapternum:string, user?:string)
     list = res.val();
   }
   // console.log('@@@', list);
-  
   return list;
+}
+
+export function getData2(bookname: string, chapternum: string, user: string, callBack: any) {
+  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`)
+  ref.orderByChild("user").equalTo(user).on("child_added", callBack);
+  return ()=>{
+    ref.orderByChild("user").equalTo(user).off("child_added", callBack);
+  };
 }
 
 export function save(textData:ItextData){
