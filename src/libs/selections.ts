@@ -3,7 +3,7 @@ import * as database from './database';
 import * as utils from './utils';
 import * as CryptoJS from 'crypto-js';
 
-let errorDataHash:any = {};
+let errorDataCache:any = [];
 let getDataDestory:any;
 
 export async function selection() {
@@ -11,10 +11,11 @@ export async function selection() {
   // await errorHighlight();
   getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot:any)=>{
     console.log('on child_added',dataSnapshot.val());
-    errorDataHash[`${new Date().getTime().toString(36)}`] = dataSnapshot.val()
-    errorHighlight(errorDataHash);
+    errorDataCache.push(dataSnapshot.val());
+    errorHighlight(errorDataCache);
   });
-  // 每次更新页面后需要重新绑定DOM事件跟 错误高亮
+
+  // BUG每次更新页面后需要重新绑定DOM事件跟 错误高亮
   let observer = new MutationObserver(() => { 
     // console.log('@@');
     setTimeout(()=>{
@@ -22,9 +23,9 @@ export async function selection() {
       // errorHighlight();
       getDataDestory()
       getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
-        console.log('on child_added', dataSnapshot.val());
-        errorDataHash[`${new Date().getTime().toString(36)}`] = dataSnapshot.val()
-        errorHighlight(errorDataHash);
+        // console.log('on child_added', dataSnapshot.val());
+        errorDataCache.push(dataSnapshot.val());
+        errorHighlight(errorDataCache);
       });
     }, 1000)
   });
@@ -93,14 +94,7 @@ export async function bindSelectEvent() {
 }
 
 // 筛选出有错误的段落，并高亮
-export async function errorHighlight(listCache?) {
-  const { title, chapter } = utils.getBookInfo();
-  let list = listCache;
-  if (!list){
-    // BUG 这边需要考虑到同时显示两章的情况
-    list = await database.getData(title, chapter, utils.getUser());
-  }
-  if (!list) return;
+export async function errorHighlight(listCache?:any) {
   const hashObj = {};
   // dom节点按hash做成字典
   [...window.document.querySelectorAll('pre')].forEach((preNode:HTMLElement)=>{
@@ -108,21 +102,17 @@ export async function errorHighlight(listCache?) {
       hashObj[CryptoJS.SHA256(node.textContent).toString()] = node;
     })
   })
-  // console.log(list);
-  // console.log(hashObj);
-  Object.keys(list).forEach(key => {
-    const matchError = list[key];
-    if (hashObj[matchError.hash]) {
-      highlightText(hashObj[matchError.hash], matchError)
+  // 段落内标出文本高亮
+  listCache.forEach((errorData: any)=> {
+    if (hashObj[errorData.hash]) {
+      highlightText(hashObj[errorData.hash], errorData)
     }
   })
-  errorDataHash = list;
-  return list;
 }
 
 // 高亮段落中的错误
 export function highlightText(matchNode: HTMLElement, matchError: ItextData) {
-  // let alltext = matchNode.firstChild.nodeValue;
+  // let alltext = matchNode.firstChild.nodeValue; BUG：只匹配1个关键词  改进参考https://hijiangtao.github.io/2017/08/03/How-to-Manipulate-DOM-Effectively/
   let alltext = matchNode.innerText.trim();
   matchNode.innerHTML = alltext
     .split(matchError.text)
