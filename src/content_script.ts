@@ -6,13 +6,13 @@ import { sideComments } from './libs/sideComments'
 
 
 async function init() {
-  sideComments();
+  // sideComments();
   // 由于url更新，整个js都会重新运行
   if (!window.janusWindowLoaded){
     window.janusWindowLoaded=true;
     await windowLoaded();
+    selection();
   }
-  selection();
 }
 
 init();
