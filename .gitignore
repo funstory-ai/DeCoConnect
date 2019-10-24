@@ -6,3 +6,5 @@ tmp/
 config.json
 .DS_Store
 *debug.log
+dist.crx
+dist.pem

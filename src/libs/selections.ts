@@ -7,13 +7,15 @@ let errorDataCache:any = [];
 let getDataDestory:any;
 
 export async function selection() {
-  bindSelectEvent();
-  // await errorHighlight();
-  getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot:any)=>{
-    console.log('on child_added',dataSnapshot.val());
-    errorDataCache.push(dataSnapshot.val());
-    errorHighlight(errorDataCache);
-  });
+  setTimeout(()=>{
+    bindSelectEvent();
+    // await errorHighlight();
+    getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot:any)=>{
+      // console.log('on child_added',dataSnapshot.val());
+      errorDataCache.push(dataSnapshot.val());
+      errorHighlight(errorDataCache);
+    });
+  },1000)
 
   // BUG每次更新页面后需要重新绑定DOM事件跟 错误高亮
   let observer = new MutationObserver(() => { 
@@ -44,15 +46,25 @@ export async function bindSelectEvent() {
     if (txtdom) {
       // 清除 文本禁选
       txtdom.style.userSelect = 'text';
+      txtdom.onmousedown = (event)=>{
+        const target: any = event.target
+        target.innerHTML = target.innerText;
+        console.log(event.target);
+      }
+
       txtdom.onmouseup = async (event: any) => {
         // console.log('@@onmouseup');
         // console.log(event);
         const selectionObj: any = window.getSelection();
+        // console.log(selectionObj);
+        
         if (selectionObj.baseNode.data !== selectionObj.focusNode.data) {
           return;
         }
         const selectedParagraph: string = selectionObj.focusNode && selectionObj.focusNode.data;
         const txt = selectedParagraph.slice(selectionObj.anchorOffset, selectionObj.focusOffset);
+        const textIndex = [selectionObj.anchorOffset, selectionObj.focusOffset];
+        // console.log(txt, selectionObj.anchorOffset, selectionObj.focusOffset);
         // 如果有选中文本显示错误类型选择框
         if (txt) {
           // 显示选择框
@@ -60,11 +72,11 @@ export async function bindSelectEvent() {
             left: `${event.pageX}px`,
             top: `${event.pageY}px`
           }).empty().append(`
-            <div class="errorOption" check-data="1">G - wrong Gender of pronoun</div>
-            <div class="errorOption" check-data="2">IT - Inconsist ent Term</div>
-            <div class="errorOption" check-data="3">AAA - Abuse of Adjective / Adverb</div>
-            <div class="errorOption" check-data="4">IS - Incomplet e Sent ence</div>
-            <div class="errorOption" check-data="5">B - Bad t ranslat ion</div>
+            <div class="errorOption" check-data="1">T - Term errors, including wrong/obscure terms and inconsistent terms.</div>
+            <div class="errorOption" check-data="2">P - Pronoun errors, including wrong genders and wrong references.</div>
+            <div class="errorOption" check-data="3">AA - Adj./Adv. errors, inappropriate usage or abuse of adj/adv.</div>
+            <div class="errorOption" check-data="4">IS - Incomplete sentence.</div>
+            <div class="errorOption" check-data="5">BT - Bad translation, or other severe errors.</div>
           `).show();
           // 绑定选择点击事件
           $('.errorOption').click((event) => {
@@ -80,12 +92,14 @@ export async function bindSelectEvent() {
               title: bookinfo.title,
               user: utils.getUser(),
               chapter: bookinfo.chapter,
-              number: [selectionObj.anchorOffset, selectionObj.focusOffset],
+              number: textIndex,
               content: selectedParagraph,
               text: txt,
               errType: event.target.attributes['check-data'].value,
             });
           })
+        }else{
+          errorHighlight(errorDataCache);
         }
       }
     }
@@ -93,30 +107,77 @@ export async function bindSelectEvent() {
   return true;
 }
 
+// 过滤掉混淆的代码
+export function filterTrueNodes(nodeArr: HTMLElement[]) {
+  return nodeArr.filter(node => window.getComputedStyle(node).height !== '0px')
+}
+
 // 筛选出有错误的段落，并高亮
-export async function errorHighlight(listCache?:any) {
-  const hashObj = {};
+export async function errorHighlight(listCache: ItextData[]) {
+  const hashNodeObj = {};
+  const hashErrorObj = {};
   // dom节点按hash做成字典
   [...window.document.querySelectorAll('pre')].forEach((preNode:HTMLElement)=>{
-    [...preNode.childNodes].forEach(node => {
-      hashObj[CryptoJS.SHA256(node.textContent).toString()] = node;
+    filterTrueNodes([...preNode.childNodes] as HTMLElement[]).forEach(node => {
+      hashNodeObj[CryptoJS.SHA256(node.textContent).toString()] = node;
     })
   })
   // 段落内标出文本高亮
-  listCache.forEach((errorData: any)=> {
-    if (hashObj[errorData.hash]) {
-      highlightText(hashObj[errorData.hash], errorData)
+  listCache.forEach((errorData: ItextData)=> {
+    if(!hashErrorObj[errorData.hash]){
+      hashErrorObj[errorData.hash] = [];
+    }
+    hashErrorObj[errorData.hash].push(errorData);
+  })
+
+  Object.keys(hashErrorObj).forEach((key:string)=>{
+    const errorDataArr:ItextData[] = hashErrorObj[key]
+    if (hashNodeObj[errorDataArr[0].hash]) {
+      highlightText(hashNodeObj[errorDataArr[0].hash], errorDataArr)
     }
   })
 }
 
 // 高亮段落中的错误
-export function highlightText(matchNode: HTMLElement, matchError: ItextData) {
-  // let alltext = matchNode.firstChild.nodeValue; BUG：只匹配1个关键词  改进参考https://hijiangtao.github.io/2017/08/03/How-to-Manipulate-DOM-Effectively/
-  let alltext = matchNode.innerText.trim();
-  matchNode.innerHTML = alltext
-    .split(matchError.text)
-    .join(`<span class="janusError janusErrorType${matchError.errType}">${matchError.text}</span>`)
+export function highlightText(matchNode: HTMLElement, matchErrorArr: ItextData[]) {
+  // let alltext = matchNode.firstChild.nodeValue; BUG：只匹配1个关键词  改进参考https://juejin.im/post/5c2434856fb9a049f362269f
+  let alltextArr: string | string[] = matchNode.innerText.trim().split('');
+
+  matchErrorArr.sort((a, b) => a.number[0] - b.number[0])
+  for (let index = 0; index < matchErrorArr.length; index++) {
+    const matchError = matchErrorArr[index];
+    alltextArr[matchError.number[0]] = `@@@$${matchError.errType}$@@@${alltextArr[matchError.number[0]]}`;
+    alltextArr[matchError.number[1]] = `${alltextArr[matchError.number[1]]}$$$@@$$$`;
+  }
+
+  alltextArr = alltextArr.join('');
+
+  for (let index = 0; index < 5; index++) {
+    const spanReg = new RegExp(`@@@\\$${index+1}\\$@@@`,'g')
+    // console.log(spanReg);
+    
+    alltextArr = alltextArr.replace(spanReg, `<span class="janusError janusErrorType${index + 1}">`)
+    // console.log(alltextArr);
+
+  }
+  alltextArr = alltextArr.replace(/\$\$\$@@\$\$\$/g, `</span>`)
+  
+  matchNode.innerHTML = alltextArr;
+
+
+  // var highlightEl = document.createElement('span');
+  // $('pre').children[45].innerHTML = `At this moment, a rather authoritative voice resounded in the arena. A tall and middle-aged man stepped on the air as he arrived, and his entire body emitted a domineering imposing manner. He was the current Sect Master of Celestial Sect, Wu Kuangyun!`
+  // var node = $('pre').children[45].firstChild
+  // var matchResult = node.data.match('authoritative voice reso');
+  // var matchNode = node.splitText(matchResult.index);
+  // matchNode.splitText(matchResult[0].length);
+  // var highlightTextNode = document.createTextNode(matchNode.data);
+  // highlightEl.appendChild(highlightTextNode);
+  // matchNode.parentNode.replaceChild(highlightEl, matchNode);
+
+  // matchNode.innerHTML = alltext
+  //   .split(matchErrorArr[0].text)
+  //   .join(`<span class="janusError janusErrorType${matchErrorArr[0].errType}">${matchErrorArr[0].text}</span>`)
   // matchNode.firstChild.nodeValue = alltext.split(matchError.text).join(`<span style="background:red;">${matchError.text}</span>`)
 }
 
