@@ -23,3 +23,8 @@ declare interface IBookInfo {
   title: string;
   chapter: string;
 }
+declare interface IRightTxtIndex {
+  selectedParagraph: string;
+  txt: string;
+  textIndex: number[];
+}

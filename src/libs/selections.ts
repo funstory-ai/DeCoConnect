@@ -34,6 +34,81 @@ export async function selection() {
   observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
 }
 
+export function isHighlightBox(element:HTMLElement) {
+  return !!element.className.match('janusError');
+}
+
+export function getRightTxtIndex(): IRightTxtIndex | null {
+  const selectionObj: any = window.getSelection();
+  if (selectionObj.toString()===''){
+    return null;
+  }
+  console.log(selectionObj);
+  // 排除选中两段内容的情况
+  let startNodeData: string = '';
+  let endNodeData: string = '';
+  if (isHighlightBox(selectionObj.anchorNode.parentElement)) {
+    startNodeData = selectionObj.anchorNode.parentElement.parentElement.textContent;
+  } else {
+    startNodeData = selectionObj.anchorNode.parentElement.textContent;
+  }
+
+  if (isHighlightBox(selectionObj.focusNode.parentElement)) {
+    endNodeData = selectionObj.focusNode.parentElement.parentElement.textContent;
+
+  } else {
+    endNodeData = selectionObj.focusNode.parentElement.textContent;
+  }
+  if (startNodeData !== endNodeData) {
+    console.warn('selected more than 1 paragraphs!!!!');
+    return null;
+  }
+
+  // 查出选中文字在整段中位置
+  let startNodeIndex: number = 0;
+  let endNodeIndex: number = 0;
+  // 选中的是个textnode 文本中有高亮错误在的话 整段文本会被切成多个textnode  正确的index需要计算出来
+  if (isHighlightBox(selectionObj.anchorNode.parentElement) || selectionObj.anchorNode.parentElement.textContent !== selectionObj.anchorNode.nodeValue) {
+    let txtmatch = selectionObj.anchorNode.parentElement.textContent.match(selectionObj.anchorNode.nodeValue);
+    if (isHighlightBox(selectionObj.anchorNode.parentElement)) {
+      txtmatch = selectionObj.anchorNode.parentElement.parentElement.textContent.match(selectionObj.anchorNode.nodeValue);
+    }
+    if (txtmatch && txtmatch.length === 1) {
+      startNodeIndex = selectionObj.anchorOffset + txtmatch.index;
+    } else {
+      throw new Error('worng match')
+    }
+  } else {
+    startNodeIndex = selectionObj.anchorOffset;
+  }
+
+  if (isHighlightBox(selectionObj.focusNode.parentElement) || selectionObj.focusNode.parentElement.textContent !== selectionObj.focusNode.nodeValue) {
+    let txtmatch = selectionObj.focusNode.parentElement.textContent.match(selectionObj.focusNode.nodeValue);
+    if (isHighlightBox(selectionObj.focusNode.parentElement)) {
+      txtmatch = selectionObj.focusNode.parentElement.parentElement.textContent.match(selectionObj.focusNode.nodeValue);
+    }
+    if (txtmatch && txtmatch.length === 1) {
+      endNodeIndex = selectionObj.focusOffset + txtmatch.index;
+    } else {
+      throw new Error('worng match')
+    }
+  } else {
+    endNodeIndex = selectionObj.focusOffset;
+  }
+
+  // 从后往前选文字时  前后index需要换一下
+  if (endNodeIndex < startNodeIndex) {
+    const saveIndex = startNodeIndex;
+    startNodeIndex = endNodeIndex
+    endNodeIndex = saveIndex;
+  }
+
+  return {
+    txt: selectionObj.toString(),
+    textIndex:[startNodeIndex, endNodeIndex],
+    selectedParagraph: startNodeData,
+  }
+}
 
 // 绑定错误选择事件
 export async function bindSelectEvent() {
@@ -46,27 +121,20 @@ export async function bindSelectEvent() {
     if (txtdom) {
       // 清除 文本禁选
       txtdom.style.userSelect = 'text';
-      txtdom.onmousedown = (event)=>{
-        const target: any = event.target
-        target.innerHTML = target.innerText;
-        console.log(event.target);
-      }
+      // txtdom.onmousedown = (event)=>{
+      //   const target: any = event.target
+      //   target.innerHTML = target.innerText;
+      //   console.log(event.target);
+      // }
 
       txtdom.onmouseup = async (event: any) => {
-        // console.log('@@onmouseup');
+        console.log('@@onmouseup');
         // console.log(event);
-        const selectionObj: any = window.getSelection();
-        // console.log(selectionObj);
-        
-        if (selectionObj.baseNode.data !== selectionObj.focusNode.data) {
-          return;
-        }
-        const selectedParagraph: string = selectionObj.focusNode && selectionObj.focusNode.data;
-        const txt = selectedParagraph.slice(selectionObj.anchorOffset, selectionObj.focusOffset);
-        const textIndex = [selectionObj.anchorOffset, selectionObj.focusOffset];
-        // console.log(txt, selectionObj.anchorOffset, selectionObj.focusOffset);
+
+        const rightIndex = getRightTxtIndex();
         // 如果有选中文本显示错误类型选择框
-        if (txt) {
+        if(rightIndex){
+          const { selectedParagraph, txt, textIndex } = rightIndex;
           // 显示选择框
           $(optionBox()).css({
             left: `${event.pageX}px`,
@@ -98,9 +166,8 @@ export async function bindSelectEvent() {
               errType: event.target.attributes['check-data'].value,
             });
           })
-        }else{
-          errorHighlight(errorDataCache);
         }
+
       }
     }
   })
