@@ -2,13 +2,10 @@ import * as CryptoJS from 'crypto-js';
 import * as firebase from 'firebase';
 import * as config from '../config.json';
 
-
-
 export const firebaseApp = firebase.initializeApp(config.firebaseConfig);
 
-
 export async function getData(bookname: string, chapternum:string, user?:string) {
-  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`)
+  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`);
   let list: any[] = [];
   if (user){
     const res = await ref.orderByChild("user").equalTo(user).once("value");
@@ -22,7 +19,7 @@ export async function getData(bookname: string, chapternum:string, user?:string)
 }
 
 export function getData2(bookname: string, chapternum: string, user: string, callBack: any) {
-  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`)
+  const ref = firebaseApp.database().ref(`${bookname}/${chapternum}`);
   ref.orderByChild("user").equalTo(user).on("child_added", callBack);
   return ()=>{
     ref.orderByChild("user").equalTo(user).off("child_added", callBack);
@@ -39,7 +36,6 @@ export function save(textData:ItextData){
     });
 
 }
-
 
 // export async function digestMessage(message: string) {
 //   const msgUint8 = new window.TextEncoder().encode(message); // encode as (utf-8) Uint8Array

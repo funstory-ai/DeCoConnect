@@ -4,9 +4,9 @@ export async function windowLoaded() {
     window.onload = ()=>{
       // console.log($('#janusOptionBox'),'@@@');
       resolve();
-    }
+    };
     
-  })
+  });
 }
 
 export function getBookInfo(): IBookInfo {
@@ -24,12 +24,12 @@ export function getBookInfo(): IBookInfo {
   return {
     title: location.pathname.split('/')[2],
     chapter: location.pathname.split('/')[4],
-  }
+  };
 }
 
 
 export function getUser() {
-  return document.querySelector('div[class^=top-bar]').querySelector('img').src.split('/')[5]
+  return document.querySelector('div[class^=top-bar]').querySelector('img').src.split('/')[5];
 }
 
 

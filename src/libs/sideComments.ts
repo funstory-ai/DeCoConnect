@@ -9,7 +9,7 @@ import {
 export function sideComments() {
   setTimeout(()=>{
     main();
-  }, 3000)
+  }, 3000);
 }
 
 export function main() {
