@@ -1,7 +1,7 @@
 import './style/index.less';
 import { windowLoaded } from './libs/utils';
 import { selection } from './libs/selections';
-import { sideComments } from './libs/sideComments'
+// import { sideComments } from './libs/sideComments';
 // import * as Jquery from 'jquery';
 
 

@@ -9,6 +9,12 @@ export async function windowLoaded() {
   });
 }
 
+export async function waitTime(ms: number = 1000) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export function getBookInfo(): IBookInfo {
   // const titledom:HTMLElement = document.querySelector('div[class^=top-bar]').querySelector('div[class^=title-wrapper]')
   // if (titledom){

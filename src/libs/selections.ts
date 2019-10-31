@@ -19,7 +19,7 @@ export async function selection() {
 
   // BUG每次更新页面后需要重新绑定DOM事件跟 错误高亮
   let observer = new MutationObserver(() => {
-    // console.log('@@');
+    console.log('@@');
     setTimeout(() => {
       bindSelectEvent();
       // errorHighlight();
@@ -132,8 +132,10 @@ export async function bindSelectEvent() {
   return true;
 }
 
-export function mouseUpHandle(event: MouseEvent) {
-  console.log('@@onmouseup');
+export async function mouseUpHandle(event: MouseEvent) {
+  // console.log('@@onmouseup');
+  // 修复 场景：选中一段文字，点击选中的文字，会出现错误选择框，这里加个延时就不会有了
+  await utils.waitTime(50);
   // console.log(event);
   const rightIndex = getRightTxtIndex();
   // 如果有选中文本显示错误类型选择框
