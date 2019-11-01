@@ -4,34 +4,47 @@ import * as utils from './utils';
 import * as CryptoJS from 'crypto-js';
 
 let errorDataCache: any = [];
-let getDataDestory: any;
+let getDataDestory: any = ()=>{};
 
 export async function selection() {
-  setTimeout(() => {
+  // setTimeout(() => {
+    console.log('selection init');
     bindSelectEvent();
     // await errorHighlight();
+    getDataDestory();
     getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
       // console.log('on child_added',dataSnapshot.val());
       errorDataCache.push(dataSnapshot.val());
       errorHighlight(errorDataCache);
     });
-  }, 1000);
+  // }, 1000);
+}
 
-  // BUG每次更新页面后需要重新绑定DOM事件跟 错误高亮
-  let observer = new MutationObserver(() => {
-    console.log('@@');
-    setTimeout(() => {
-      bindSelectEvent();
-      // errorHighlight();
-      getDataDestory();
-      getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
-        // console.log('on child_added', dataSnapshot.val());
-        errorDataCache.push(dataSnapshot.val());
-        errorHighlight(errorDataCache);
-      });
-    }, 1000);
+export async function extensionInit() {
+
+}
+
+// 绑定错误选择事件
+export async function bindSelectEvent() {
+  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('pre')];  
+  console.log('start bind select event & content Dom list:', txtdomArr);
+  const urlbookinfo = utils.getBookInfo();
+  const urlChapterNum = parseInt(urlbookinfo.chapter.replace('c', ''),10);
+  txtdomArr.forEach(preElm => {
+    if(!preElm) { return; }
+    const cnum = parseInt(getChapterFromPreElement(preElm).replace('c',''),10);
+    // 当前url是章6  则给章5,章6,章7的内容进行事件绑定，其他章节取消事件绑定
+    // 因为当前url最多可以同时看到上下两章内容
+    // console.log(getChapterFromPreElement(preElm));
+    if (cnum >= (urlChapterNum -1) && cnum <= (urlChapterNum + 1) ){
+      //清除文本的禁选样式
+      preElm.style.userSelect = 'text';
+      preElm.onmouseup = mouseUpHandle;
+    }else{
+      preElm.onmouseup = null;
+    }
   });
-  observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
+  return true;
 }
 
 export function isHighlightBox(element: HTMLElement) {
@@ -103,34 +116,36 @@ export function getRightTxtIndex(): IRightTxtIndex | null {
     endNodeIndex = saveIndex;
   }
 
+  let preElement:HTMLElement;
+  if (isHighlightBox(selectionObj.focusNode.parentElement)){
+    preElement = selectionObj.anchorNode.parentElement.parentElement.parentElement;
+  }else{
+    preElement = selectionObj.anchorNode.parentElement.parentElement;
+  }
+
+  const chapter = getChapterFromPreElement(preElement);
+  if(!chapter){
+    return null;
+  }
+
   return {
     txt: selectionObj.toString(),
     textIndex: [startNodeIndex, endNodeIndex],
     selectedParagraph: startNodeData,
+    chapter,
   };
 }
 
-// 绑定错误选择事件
-export async function bindSelectEvent() {
-  // console.log('window.optionBox',window.optionBox);
-  // console.log('window loaded');
-  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('pre')];
-  console.log('content Dom', txtdomArr);
-  txtdomArr.forEach((txtdom) => {
-    console.log(txtdom);
-    if (txtdom) {
-      // 清除 文本禁选
-      txtdom.style.userSelect = 'text';
-      // txtdom.onmousedown = (event)=>{
-      //   const target: any = event.target
-      //   target.innerHTML = target.innerText;
-      //   console.log(event.target);
-      // }
-      txtdom.onmouseup = mouseUpHandle;
-    }
-  });
-  return true;
+// 通过文本中的标题获取章节号
+export function getChapterFromPreElement(preElement:HTMLElement):string{
+  if (preElement.nodeName !== 'PRE') {
+    return '';
+  }
+  // 因为一页中可能同时出现两章内容，这边通过章节标题的文本来提取章号，而不是url里取
+  return preElement.parentElement.querySelector('h1').innerText.match(/[cC]\d+/)[0].toLowerCase();
 }
+
+
 
 export async function mouseUpHandle(event: MouseEvent) {
   // console.log('@@onmouseup');
@@ -140,7 +155,7 @@ export async function mouseUpHandle(event: MouseEvent) {
   const rightIndex = getRightTxtIndex();
   // 如果有选中文本显示错误类型选择框
   if (rightIndex) {
-    const { selectedParagraph, txt, textIndex } = rightIndex;
+    const { selectedParagraph, txt, textIndex, chapter } = rightIndex;
     // 显示选择框
     $(optionBox()).css({
       left: `${event.pageX}px`,
@@ -156,16 +171,10 @@ export async function mouseUpHandle(event: MouseEvent) {
     $('.errorOption').click((event) => {
       hidebox();
       const bookinfo = utils.getBookInfo();
-      // 因为一页中可能同时出现两章内容，这边通过章节标题的文本来提取章号，而不是url里取
-      // console.log(selectionObj.focusNode.parentNode);
-      // console.log(selectionObj);
-      // const chapter = selectionObj.focusNode.parentNode.parentNode.parentNode.querySelector('h1').innerText.match(/[cC]\d+/)[0].toLowerCase();
-      // console.log(event.target.attributes['check-data'].value);
-      // console.log('@@click');
       database.save({
         title: bookinfo.title,
         user: utils.getUser(),
-        chapter: bookinfo.chapter,
+        chapter,
         number: textIndex,
         content: selectedParagraph,
         text: txt,

@@ -18,7 +18,7 @@
       "run_at": "document_start"
     },
     {
-      "matches": ["*://*.babelnovel.com/books/*/chapters/*"],
+      "matches": ["*://*.babelnovel.com/*"],
       "js": ["js/vendor.js", "js/content_script.js"],
       "run_at": "document_end"
     }

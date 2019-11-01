@@ -4,6 +4,7 @@ declare interface Window extends Window {
   // optionBox: any;
   $: any;
   janusWindowLoaded:any;
+  janusAlreadyInit:any;
 }
 // declare interface CustomWindow extends Window {
 //   customAttribute: any;
@@ -27,4 +28,5 @@ declare interface IRightTxtIndex {
   selectedParagraph: string;
   txt: string;
   textIndex: number[];
+  chapter: string;
 }
