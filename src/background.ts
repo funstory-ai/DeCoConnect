@@ -17,7 +17,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     }, function (tabs) {
       const tab = tabs[0];
       const url = tab.url;
-      if (/^https?:\/\/(www\.)?babelnovel\.com\/books\/[a-z0-9\-]+\/chapters\//g.test(url)) {
+      // if (/^https?:\/\/(www\.)?babelnovel\.com\/books\/[a-z0-9\-]+\/chapters\//g.test(url)) {
+      if (/^https?:\/\/(www\.)?babelnovel\.com\//g.test(url)) {
         chrome.tabs.executeScript({
           file: 'js/content_script.js'
         });

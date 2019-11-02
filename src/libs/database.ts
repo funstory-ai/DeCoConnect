@@ -1,8 +1,7 @@
 import * as CryptoJS from 'crypto-js';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/database';
 import * as config from '../config.json';
-import { resolve } from 'url';
-import { rejects } from 'assert';
 
 export const firebaseApp = firebase.initializeApp(config.firebaseConfig);
 

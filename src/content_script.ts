@@ -6,45 +6,51 @@ import { setInterval } from 'timers';
 // import * as Jquery from 'jquery';
 
 
+// background.ts: url更新chrome就会运行content_script.ts
 async function init() {
+  // sideComments();
+  console.log('executeScript', `\njanusWindowLoaded:${window.janusWindowLoaded}`, `\njanusAlreadyInit: ${window.janusAlreadyInit}`);
 
-  console.log('@@', window.janusWindowLoaded);
-  if (!window.location.pathname.match(/\/books\/[a-z\-]+\/chapters\/c\d+/)){
-    // 去其他页面后返回章节详情页需要重新触发运行selection
+  // 第一次进入小说站，需要等待页面加载完成后再运行
+  if (!window.janusWindowLoaded) {
+    console.log('page first init');
+    await windowLoaded();
+    console.log('windowLoaded');
+    window.janusWindowLoaded = true;
+  }
+
+  // 非详情页不触发事件绑定，并且初始化
+  if (!/\/books\/[a-z0-9\-]+\/chapters\/c\d+/.test(window.location.pathname)){
     window.janusAlreadyInit = false;
+    window.janusRetryTime = 1;
     return;
   }
-  // sideComments();
-  // 由于chrome插件的特性：url更新后能匹配manifest.json中配置的url，这个js就会重新运行一遍
-  // 第一次运行selection，需要等待页面加载完成后
-  // 之后滚动页面加载新章节会更新url，触发运行selection
-  // if (!window.janusWindowLoaded || !window.janusAlreadyInit){
-  if (!window.janusWindowLoaded){
-    console.log('page first init');
-    if (!window.janusWindowLoaded){
-      await windowLoaded();
-      console.log('windowLoaded');
-      // window.janusWindowLoaded = true;
-    }
-    // if (window.janusAlreadyInit){
-    //   return;
-    // }
-    // window.janusAlreadyInit = true;
-    await waitTime(1000);
+
+  // 详情页加载更多章节
+  if (window.janusAlreadyInit){
     selection();
-    // 由于小说站交互特性：滚动加载下一章内容时，url更新前，就会加载数据更新dom，刷新掉之前的绑定在dom上的事件跟高亮
-    // 这里加了个dom更新事件绑定. dom更新就触发运行selection
-    let observer = new window.MutationObserver((records, itself) => {
-      console.log('dom updated', records, itself);
-      selection();
-    });
-    observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
+    return;
   }
-  // else{
-  //   console.log('pageurl update');
-  //   await waitTime(1000);
-  //   selection();
-  // }
+  
+  // 初次进入详情页
+  // 如果DOM没有渲染完成 500毫秒后重新初始化 重试次数越多间隔时间越长
+  if (!document.querySelector('div[class^=page-container]').children[0].querySelector('h1')) {
+    console.log('retry');
+    window.janusAlreadyInit = false;
+    window.janusRetryTime = window.janusRetryTime ? window.janusRetryTime + 1 : 1;
+    await waitTime(window.janusRetryTime * 500);
+    init();
+    return;
+  }
+  window.janusAlreadyInit = true;
+  selection();
+  // dom更新就触发运行selection
+  let observer = new window.MutationObserver((records, itself) => {
+    console.log('dom updated', records, itself);
+    selection();
+  });
+  observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
+
 }
 
 init();

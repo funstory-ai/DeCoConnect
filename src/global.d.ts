@@ -5,6 +5,7 @@ declare interface Window extends Window {
   $: any;
   janusWindowLoaded:any;
   janusAlreadyInit:any;
+  janusRetryTime: number;
 }
 // declare interface CustomWindow extends Window {
 //   customAttribute: any;

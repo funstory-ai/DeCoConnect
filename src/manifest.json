@@ -3,7 +3,13 @@
   "version": "0.1.0",
   "description": "Find and mark translation errors.",
   "manifest_version": 2,
-  "permissions": ["*://*.babelnovel.com/*", "tabs", "activeTab", "storage"],
+  "permissions": [
+    "*://*.babelnovel.com/*",
+    "tabs",
+    "activeTab",
+    "declarativeContent",
+    "storage"
+  ],
   "background": {
     "scripts": ["js/vendor.js", "js/background.js"],
     "persistent": false
