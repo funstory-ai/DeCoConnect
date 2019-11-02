@@ -55,7 +55,7 @@ module.exports = {
       {
         from: '.',
         to: '../',
-        ignore: ['*.ts', '*.less'],
+        ignore: ['*.ts', '*.less','config.json','config.sample.json'],
       }
     ],{
       context: 'src'

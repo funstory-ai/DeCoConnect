@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --config webpack/webpack.dev.js",
-    "build": "webpack --config webpack/webpack.prod.js && ts-node ./src/fixVendorJs.ts",
+    "build": "npm run clean && webpack --config webpack/webpack.prod.js && ts-node ./src/fixVendorJs.ts",
     "clean": "rimraf dist"
   },
   "author": "",
