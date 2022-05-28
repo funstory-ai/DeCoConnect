@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "commonjs",
     "target": "es6",
     // "lib": [
@@ -13,5 +14,8 @@
 	  // "strict": true, /* enable all strict type-checking options */
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"]
-  }
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

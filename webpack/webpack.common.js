@@ -22,43 +22,51 @@ module.exports = {
   },
   module: {
     rules: [{
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/
+    },
+    {
+      test: /\.less$/,
+      use: [{
+        loader: 'style-loader',
       },
       {
-        test: /\.less$/,
-        use: [{
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-          },
-          {
-            loader: 'less-loader',
-            options: {
-              strictMath: true,
-              noIeCompat: true,
-            },
-          },
-        ],
+        loader: 'css-loader',
       },
+      {
+        loader: 'less-loader',
+        options: {
+          lessOptions: {
+            strictMath: true,
+          },
+        },
+      },
+      ],
+    },
     ]
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.tsx', '.js'],
+    fallback: { "buffer": require.resolve("buffer/") },
   },
   plugins: [
     // exclude locale files in moment
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new CopyPlugin([
-      {
-        from: '.',
-        to: '../',
-        ignore: ['*.ts', '*.less','config.json','config.sample.json'],
-      }
-    ],{
-      context: 'src'
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/locale$/,
+      contextRegExp: /moment$/,
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: '.',
+          to: '../',
+          context: 'src',
+          globOptions: {
+            ignore: ['*.ts', '*.less', 'config.json', 'config.sample.json'],
+          }
+        }
+      ],
     }),
   ]
 };
