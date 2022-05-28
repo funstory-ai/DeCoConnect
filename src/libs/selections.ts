@@ -11,7 +11,7 @@ export async function selection() {
     console.log('selection init');
     bindSelectEvent();
     // await errorHighlight();
-    getDataDestory();
+    // getDataDestory();
     getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
       // console.log('on child_added',dataSnapshot.val());
       errorDataCache.push(dataSnapshot.val());
@@ -32,17 +32,12 @@ export async function bindSelectEvent() {
   const urlChapterNum = parseInt(urlbookinfo.chapter.replace('c', ''),10);
   txtdomArr.forEach(preElm => {
     if(!preElm) { return; }
-    const cnum = parseInt(getChapterFromPreElement(preElm).replace('c',''),10);
+    // const cnum = parseInt(getChapterFromPreElement(preElm).replace('c',''),10);
     // 当前url是章6  则给章5,章6,章7的内容进行事件绑定，其他章节取消事件绑定
     // 因为当前url最多可以同时看到上下两章内容
     // console.log(getChapterFromPreElement(preElm));
-    if (cnum >= (urlChapterNum -1) && cnum <= (urlChapterNum + 1) ){
-      //清除文本的禁选样式
-      preElm.style.userSelect = 'text';
-      preElm.onmouseup = mouseUpHandle;
-    }else{
-      preElm.onmouseup = null;
-    }
+    preElm.style.userSelect = 'text';
+    preElm.onmouseup = mouseUpHandle;
   });
   return true;
 }
@@ -53,10 +48,10 @@ export function isHighlightBox(element: HTMLElement) {
 
 export function getRightTxtIndex(): IRightTxtIndex | null {
   const selectionObj: any = window.getSelection();
+  // console.log(selectionObj);
   if (selectionObj.toString() === '') {
     return null;
   }
-  console.log(selectionObj);
   // 排除选中两段内容的情况
   let startNodeData: string = '';
   let endNodeData: string = '';
@@ -122,7 +117,6 @@ export function getRightTxtIndex(): IRightTxtIndex | null {
   }else{
     preElement = selectionObj.anchorNode.parentElement.parentElement;
   }
-
   const chapter = getChapterFromPreElement(preElement);
   if(!chapter){
     return null;
@@ -138,11 +132,11 @@ export function getRightTxtIndex(): IRightTxtIndex | null {
 
 // 通过文本中的标题获取章节号
 export function getChapterFromPreElement(preElement:HTMLElement):string{
-  if (preElement.nodeName !== 'PRE') {
-    return '';
-  }
+  // if (preElement.nodeName !== 'PRE') {
+  //   return '';
+  // }
   // 因为一页中可能同时出现两章内容，这边通过章节标题的文本来提取章号，而不是url里取
-  return preElement.parentElement.querySelector('h1').innerText.match(/[cC]\d+/)[0].toLowerCase();
+  return preElement.querySelector('h3').innerText.match(/[cC]\d+/)[0].toLowerCase();
 }
 
 
@@ -189,15 +183,13 @@ export function filterTrueNodes(nodeArr: HTMLElement[]) {
   return nodeArr.filter(node => window.getComputedStyle(node).height !== '0px');
 }
 
-// 筛选出有错误的段落，并高亮
 export async function errorHighlight(listCache: ItextData[]) {
+  console.log(listCache)
   const hashNodeObj = {};
   const hashErrorObj = {};
   // dom节点按hash做成字典
-  [...window.document.querySelectorAll('pre')].forEach((preNode: HTMLElement) => {
-    filterTrueNodes([...preNode.childNodes] as HTMLElement[]).forEach(node => {
-      hashNodeObj[CryptoJS.SHA256(node.textContent).toString()] = node;
-    });
+  [...window.document.querySelectorAll('p')].forEach((preNode: HTMLElement) => {
+      hashNodeObj[CryptoJS.SHA256(preNode.textContent).toString()] = preNode;
   });
   // 段落内标出文本高亮
   listCache.forEach((errorData: ItextData) => {
