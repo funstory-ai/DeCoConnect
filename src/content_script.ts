@@ -34,7 +34,7 @@ async function init() {
   
   // 初次进入详情页
   // 如果DOM没有渲染完成 500毫秒后重新初始化 重试次数越多间隔时间越长
-  if (!document.querySelector('div[class^=page-container]').children[0].querySelector('h1')) {
+  if (!document.querySelector('div[class^=pc_page]').querySelector('section').querySelector('h3')) {
     console.log('retry');
     window.janusAlreadyInit = false;
     window.janusRetryTime = window.janusRetryTime ? window.janusRetryTime + 1 : 1;
@@ -49,7 +49,7 @@ async function init() {
     console.log('dom updated', records, itself);
     selection();
   });
-  observer.observe(document.querySelector('div[class^=page-container]').parentElement, { childList: true });
+  observer.observe(document.querySelector('div[class^=pc_page]').parentElement, { childList: true });
 
 }
 

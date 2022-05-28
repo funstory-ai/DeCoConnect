@@ -26,7 +26,7 @@ export async function extensionInit() {
 
 // 绑定错误选择事件
 export async function bindSelectEvent() {
-  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('pre')];  
+  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('p')];  
   console.log('start bind select event & content Dom list:', txtdomArr);
   const urlbookinfo = utils.getBookInfo();
   const urlChapterNum = parseInt(urlbookinfo.chapter.replace('c', ''),10);
