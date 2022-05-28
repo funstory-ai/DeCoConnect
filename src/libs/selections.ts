@@ -2,6 +2,8 @@ import * as database from './database';
 // import { utils.getBookInfo, utils.getUser } from './utils';
 import * as utils from './utils';
 import * as CryptoJS from 'crypto-js';
+import * as ReactDOM from 'react-dom/client';
+import FollowButton from "./FollowMinter";
 
 let errorDataCache: any = [];
 let getDataDestory: any = ()=>{};
@@ -11,7 +13,7 @@ export async function selection() {
     console.log('selection init');
     bindSelectEvent();
     // await errorHighlight();
-    // getDataDestory();
+    getDataDestory();
     getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
       // console.log('on child_added',dataSnapshot.val());
       errorDataCache.push(dataSnapshot.val());
@@ -154,27 +156,32 @@ export async function mouseUpHandle(event: MouseEvent) {
     $(optionBox()).css({
       left: `${event.pageX}px`,
       top: `${event.pageY}px`
-    }).empty().append(`
-            <div class="errorOption" check-data="1">T - Term errors, including wrong/obscure terms and inconsistent terms.</div>
-            <div class="errorOption" check-data="2">P - Pronoun errors, including wrong genders and wrong references.</div>
-            <div class="errorOption" check-data="3">AA - Adj./Adv. errors, inappropriate usage or abuse of adj/adv.</div>
-            <div class="errorOption" check-data="4">IS - Incomplete sentence.</div>
-            <div class="errorOption" check-data="5">BT - Bad translation, or other severe errors.</div>
-          `).show();
+    }).empty();
+    const optionBoxRoot = ReactDOM.createRoot(
+      document.getElementById('optionBoxDiv')
+    ); 
+    optionBoxRoot.render(FollowButton());
+    // append(`
+    //         <div class="errorOption" check-data="1">T - Term errors, including wrong/obscure terms and inconsistent terms.</div>
+    //         <div class="errorOption" check-data="2">P - Pronoun errors, including wrong genders and wrong references.</div>
+    //         <div class="errorOption" check-data="3">AA - Adj./Adv. errors, inappropriate usage or abuse of adj/adv.</div>
+    //         <div class="errorOption" check-data="4">IS - Incomplete sentence.</div>
+    //         <div class="errorOption" check-data="5">BT - Bad translation, or other severe errors.</div>
+    //       `).show();
     // 绑定选择点击事件
-    $('.errorOption').click((event) => {
-      hidebox();
-      const bookinfo = utils.getBookInfo();
-      database.save({
-        title: bookinfo.title,
-        user: utils.getUser(),
-        chapter,
-        number: textIndex,
-        content: selectedParagraph,
-        text: txt,
-        errType: event.target.attributes['check-data'].value,
-      });
-    });
+    // $('.errorOption').click((event) => {
+    //   hidebox();
+    //   const bookinfo = utils.getBookInfo();
+    //   database.save({
+    //     title: bookinfo.title,
+    //     user: utils.getUser(),
+    //     chapter,
+    //     number: textIndex,
+    //     content: selectedParagraph,
+    //     text: txt,
+    //     errType: event.target.attributes['check-data'].value,
+    //   });
+    // });
   }
 }
 

@@ -1,5 +1,5 @@
 
-export async function windowLoaded() {
+export async function windowLoaded():Promise<void> {
   return new Promise((resolve) => {
     window.onload = ()=>{
       // console.log($('#janusOptionBox'),'@@@');
