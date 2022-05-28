@@ -1,9 +1,9 @@
-import * as database from './database';
+import * as database from '../../libs/database';
 // import { utils.getBookInfo, utils.getUser } from './utils';
-import * as utils from './utils';
+import * as utils from '../../libs/utils';
 import * as CryptoJS from 'crypto-js';
 import * as ReactDOM from 'react-dom/client';
-import FollowButton from "../components/FollowMinter";
+import FollowButton from "../../components/FollowMinter";
 
 let errorDataCache: any = [];
 let getDataDestory: any = ()=>{};
