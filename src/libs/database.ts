@@ -28,7 +28,6 @@ export function getData2(bookname: string, chapternum: string, user: string, cal
 }
 
 export function save(textData:ItextData){
-
   firebaseApp.database()
     .ref(`${textData.title.replace(/\s/, '')}/${textData.chapter}`)
     .push({

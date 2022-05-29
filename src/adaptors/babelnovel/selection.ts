@@ -1,24 +1,24 @@
 import * as database from '../../libs/database';
-// import { utils.getBookInfo, utils.getUser } from './utils';
 import * as utils from '../../libs/utils';
 import * as CryptoJS from 'crypto-js';
 import * as ReactDOM from 'react-dom/client';
-import FollowButton from "../../components/FollowMinter";
+import BrushApplet from '../../components/BrushApplet';
 
 let errorDataCache: any = [];
-let getDataDestory: any = ()=>{};
+let getDataDestory: any = () => { };
+let optionBoxRoot: any = optionBox();
 
 export async function selection() {
   // setTimeout(() => {
-    console.log('selection init');
-    bindSelectEvent();
-    // await errorHighlight();
-    getDataDestory();
-    getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
-      // console.log('on child_added',dataSnapshot.val());
-      errorDataCache.push(dataSnapshot.val());
-      errorHighlight(errorDataCache);
-    });
+  console.log('selection init');
+  bindSelectEvent();
+  // await errorHighlight();
+  getDataDestory();
+  getDataDestory = database.getData2(utils.getBook(), utils.getBookInfo().chapter, utils.getUser(), (dataSnapshot: any) => {
+    // console.log('on child_added',dataSnapshot.val());
+    errorDataCache.push(dataSnapshot.val());
+    errorHighlight(errorDataCache);
+  });
   // }, 1000);
 }
 
@@ -28,12 +28,12 @@ export async function extensionInit() {
 
 // 绑定错误选择事件
 export async function bindSelectEvent() {
-  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('p')];  
+  const txtdomArr: HTMLElement[] = [...window.document.querySelectorAll('p')];
   console.log('start bind select event & content Dom list:', txtdomArr);
   const urlbookinfo = utils.getBookInfo();
-  const urlChapterNum = parseInt(urlbookinfo.chapter.replace('c', ''),10);
+  const urlChapterNum = parseInt(urlbookinfo.chapter.replace('c', ''), 10);
   txtdomArr.forEach(preElm => {
-    if(!preElm) { return; }
+    if (!preElm) { return; }
     // const cnum = parseInt(getChapterFromPreElement(preElm).replace('c',''),10);
     // 当前url是章6  则给章5,章6,章7的内容进行事件绑定，其他章节取消事件绑定
     // 因为当前url最多可以同时看到上下两章内容
@@ -113,14 +113,14 @@ export function getRightTxtIndex(): IRightTxtIndex | null {
     endNodeIndex = saveIndex;
   }
 
-  let preElement:HTMLElement;
-  if (isHighlightBox(selectionObj.focusNode.parentElement)){
+  let preElement: HTMLElement;
+  if (isHighlightBox(selectionObj.focusNode.parentElement)) {
     preElement = selectionObj.anchorNode.parentElement.parentElement.parentElement;
-  }else{
+  } else {
     preElement = selectionObj.anchorNode.parentElement.parentElement;
   }
   const chapter = getChapterFromPreElement(preElement);
-  if(!chapter){
+  if (!chapter) {
     return null;
   }
 
@@ -133,7 +133,7 @@ export function getRightTxtIndex(): IRightTxtIndex | null {
 }
 
 // 通过文本中的标题获取章节号
-export function getChapterFromPreElement(preElement:HTMLElement):string{
+export function getChapterFromPreElement(preElement: HTMLElement): string {
   // if (preElement.nodeName !== 'PRE') {
   //   return '';
   // }
@@ -153,35 +153,15 @@ export async function mouseUpHandle(event: MouseEvent) {
   if (rightIndex) {
     const { selectedParagraph, txt, textIndex, chapter } = rightIndex;
     // 显示选择框
-    $(optionBox()).css({
+    // $(optionBox()).css({
+    //   left: `${event.pageX}px`,
+    //   top: `${event.pageY}px`
+    // }).empty();
+    const pos = {
       left: `${event.pageX}px`,
       top: `${event.pageY}px`
-    }).empty();
-    const optionBoxRoot = ReactDOM.createRoot(
-      document.getElementById('optionBoxDiv')
-    ); 
-    optionBoxRoot.render(FollowButton());
-    // append(`
-    //         <div class="errorOption" check-data="1">T - Term errors, including wrong/obscure terms and inconsistent terms.</div>
-    //         <div class="errorOption" check-data="2">P - Pronoun errors, including wrong genders and wrong references.</div>
-    //         <div class="errorOption" check-data="3">AA - Adj./Adv. errors, inappropriate usage or abuse of adj/adv.</div>
-    //         <div class="errorOption" check-data="4">IS - Incomplete sentence.</div>
-    //         <div class="errorOption" check-data="5">BT - Bad translation, or other severe errors.</div>
-    //       `).show();
-    // 绑定选择点击事件
-    // $('.errorOption').click((event) => {
-    //   hidebox();
-    //   const bookinfo = utils.getBookInfo();
-    //   database.save({
-    //     title: bookinfo.title,
-    //     user: utils.getUser(),
-    //     chapter,
-    //     number: textIndex,
-    //     content: selectedParagraph,
-    //     text: txt,
-    //     errType: event.target.attributes['check-data'].value,
-    //   });
-    // });
+    };
+    optionBoxRoot.render(BrushApplet(selectedParagraph, txt, textIndex, chapter, pos));
   }
 }
 
@@ -196,7 +176,7 @@ export async function errorHighlight(listCache: ItextData[]) {
   const hashErrorObj = {};
   // dom节点按hash做成字典
   [...window.document.querySelectorAll('p')].forEach((preNode: HTMLElement) => {
-      hashNodeObj[CryptoJS.SHA256(preNode.textContent).toString()] = preNode;
+    hashNodeObj[CryptoJS.SHA256(preNode.textContent).toString()] = preNode;
   });
   // 段落内标出文本高亮
   listCache.forEach((errorData: ItextData) => {
@@ -259,29 +239,11 @@ export function highlightText(matchNode: HTMLElement, matchErrorArr: ItextData[]
 
 // 获取错误选择框
 export function optionBox() {
-  let box = document.querySelector('#optionBoxDiv');
-  const rootContainer: HTMLElement = document.querySelector('#root');
-  if (rootContainer) {
-    rootContainer.onmousedown = () => {
-      hidebox();
-    };
-  }
-  // console.log(box);
-  if (box) {
-    return box;
-  }
   const optionBoxDiv = document.createElement('div');
   optionBoxDiv.id = 'optionBoxDiv';
   document.querySelector('body').append(optionBoxDiv);
-  // $('body').append('<div id="janusOptionBox">Test</p>')
-  // $('#optionBoxDiv').append(`
-  //   <div class="errorOption" check-data="1">G - wrong Gender of pronoun</div>
-  //   <div class="errorOption" check-data="2">IT - Inconsist ent Term</div>
-  //   <div class="errorOption" check-data="3">AAA - Abuse of Adjective / Adverb</div>
-  //   <div class="errorOption" check-data="4">IS - Incomplet e Sent ence</div>
-  //   <div class="errorOption" check-data="5">B - Bad t ranslat ion</div>
-  // `);
-  return document.querySelector('#optionBoxDiv');
+  optionBoxRoot = ReactDOM.createRoot(document.querySelector('#optionBoxDiv'))
+  return optionBoxRoot;
 }
 
 // 隐藏错误选择框

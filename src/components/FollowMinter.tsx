@@ -22,7 +22,7 @@ function FollowButton() {
 
   return (
     <button className="followButton" onClick={handleOnClick}>
-      Follow address
+      Follow The Minter
     </button>
   );
 }
