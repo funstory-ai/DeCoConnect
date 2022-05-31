@@ -1,30 +1,34 @@
-import CyberConnect, { Env, Blockchain } from "@cyberlab/cyberconnect";
-declare var window: any;
-const cyberConnect = new CyberConnect({
-  namespace: "CyberConnect",
-  env: Env.PRODUCTION,
-  chain: Blockchain.ETH,
-  provider: window.ethereum
-});
+import { useState } from "react";
+import "../style/follow.css";
+import ConnectButton from "./ConnectButton";
+import {
+  FollowButton,
+  Env,
+  Blockchain
+} from "@cyberconnect/react-follow-button";
 
-function FollowButton() {
-  const handleOnClick = async () => {
-    // Prompt to enter the address
-    const address = prompt("Enter the ens/address to follow:");
-
-    try {
-      await cyberConnect.connect(address);
-      alert(`Success: you're following ${address}!`);
-    } catch (error) {
-      console.error(error.message);
-    }
-  };
+export default function FollowMinter() {
+  const [account, setAccount] = useState<string>("");
 
   return (
-    <button className="followButton" onClick={handleOnClick}>
-      Follow The Minter
-    </button>
+    <div className="container">
+      <h1>Follow the DeCo's minter</h1>
+      <ConnectButton setAccount={setAccount}></ConnectButton>
+      {account && (
+        <FollowButton
+          provider={window.ethereum}
+          namespace="CyberConnect"
+          toAddr="0xe6aab1f16ff560d309ed7ce8e08d290306a0906c"
+          env={Env.PRODUCTION}
+          chain={Blockchain.ETH}
+          onSuccess={(e) => {
+            console.log(e);
+          }}
+          onFailure={(e) => {
+            console.log(e);
+          }}
+        />
+      )}
+    </div>
   );
 }
-
-export default FollowButton;

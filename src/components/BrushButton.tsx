@@ -13,6 +13,17 @@ function BrushButton(props) {
             text: props.txt,
             errType: "1",
         });
+        try {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts"
+            });
+
+            // Update the state for account
+            // setAccount(accounts[0]);
+            alert(`Connected with: ${accounts[0]}`);
+        } catch (error) {
+            console.error(error.message);
+        }
     };
     return <button className="brushButton" onClick={handleOnClick}>
         Mint Selected

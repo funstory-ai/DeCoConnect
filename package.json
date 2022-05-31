@@ -15,17 +15,28 @@
     "url": "https://git.tuiwen-tech.com/translation-quality/janus"
   },
   "dependencies": {
+    "@cyberconnect/react-follow-button": "^2.1.3",
     "@cyberlab/cyberconnect": "^4.4.2",
     "@cyberlab/social-verifier": "^2.0.1",
+    "@metamask/providers": "^8.1.1",
     "@types/crypto-js": "^3.1.43",
+    "@types/uuid": "^8.3.4",
     "buffer": "^6.0.3",
     "crypto-js": "^3.1.9-1",
+    "ethjs": "^0.4.0",
     "firebase": "^7.2.1",
     "jquery": "^3.4.1",
+    "metamask-extension-provider": "^3.0.0",
     "moment": "^2.24.0",
+    "post-message-stream": "^3.0.0",
+    "process": "^0.11.10",
     "react": "^18.1.0",
+    "react-comments-section": "^2.0.7",
     "react-dom": "^18.1.0",
-    "side-comments": "aroc/side-comments#master"
+    "side-comments": "aroc/side-comments#master",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.4",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.188",

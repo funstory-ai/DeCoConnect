@@ -1,7 +1,8 @@
 declare module 'side-comments/release/side-comments.js';
 declare interface Window extends Window {
   SideComments: any;
-  // optionBox: any;
+  optionBox: any;
+  ethereum: any;
   $: any;
   janusWindowLoaded:any;
   janusAlreadyInit:any;

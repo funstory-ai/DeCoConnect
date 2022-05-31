@@ -2,7 +2,7 @@ import * as database from '../../libs/database';
 import * as utils from '../../libs/utils';
 import * as CryptoJS from 'crypto-js';
 import * as ReactDOM from 'react-dom/client';
-import BrushApplet from '../../components/BrushApplet';
+import { ProxyBrushApplet, ProxyCommentApplet } from '../../components/proxy';
 
 let errorDataCache: any = [];
 let getDataDestory: any = () => { };
@@ -18,6 +18,7 @@ export async function selection() {
     // console.log('on child_added',dataSnapshot.val());
     errorDataCache.push(dataSnapshot.val());
     errorHighlight(errorDataCache);
+    bindHoverEvent()
   });
   // }, 1000);
 }
@@ -40,6 +41,15 @@ export async function bindSelectEvent() {
     // console.log(getChapterFromPreElement(preElm));
     preElm.style.userSelect = 'text';
     preElm.onmouseup = mouseUpHandle;
+  });
+  return true;
+}
+
+export async function bindHoverEvent() {
+
+  const spandomArr: HTMLElement[] = [...window.document.querySelectorAll('span')];
+  spandomArr.forEach(preElm => {
+    preElm.onmouseup = mouseOverHandle;
   });
   return true;
 }
@@ -141,6 +151,13 @@ export function getChapterFromPreElement(preElement: HTMLElement): string {
   return preElement.querySelector('h3').innerText.match(/[cC]\d+/)[0].toLowerCase();
 }
 
+export async function mouseOverHandle(event: MouseEvent) {
+    const pos = {
+      left: `${event.pageX}px`,
+      top: `${event.pageY}px`
+    };
+    optionBoxRoot.render(ProxyCommentApplet(pos));
+}
 
 
 export async function mouseUpHandle(event: MouseEvent) {
@@ -161,7 +178,7 @@ export async function mouseUpHandle(event: MouseEvent) {
       left: `${event.pageX}px`,
       top: `${event.pageY}px`
     };
-    optionBoxRoot.render(BrushApplet(selectedParagraph, txt, textIndex, chapter, pos));
+    optionBoxRoot.render(ProxyBrushApplet({ selectedParagraph, txt, textIndex, chapter, pos }));
   }
 }
 
@@ -192,6 +209,7 @@ export async function errorHighlight(listCache: ItextData[]) {
       highlightText(hashNodeObj[errorDataArr[0].hash], errorDataArr);
     }
   });
+
 }
 
 // 高亮段落中的错误
@@ -242,8 +260,7 @@ export function optionBox() {
   const optionBoxDiv = document.createElement('div');
   optionBoxDiv.id = 'optionBoxDiv';
   document.querySelector('body').append(optionBoxDiv);
-  optionBoxRoot = ReactDOM.createRoot(document.querySelector('#optionBoxDiv'))
-  return optionBoxRoot;
+  return ReactDOM.createRoot(document.querySelector('#optionBoxDiv'))
 }
 
 // 隐藏错误选择框

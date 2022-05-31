@@ -20,11 +20,16 @@ module.exports = {
       chunks: "initial"
     }
   },
+  devtool: 'inline-source-map',
   module: {
     rules: [{
       test: /\.tsx?$/,
       use: 'ts-loader',
       exclude: /node_modules/
+    },
+    {
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader']
     },
     {
       test: /\.less$/,
@@ -48,13 +53,21 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
-    fallback: { "buffer": require.resolve("buffer/") },
+    fallback: {
+      "util": require.resolve("util/"),
+      "buffer": require.resolve("buffer/"),
+      "stream": require.resolve("stream-browserify")
+    },
   },
   plugins: [
     // exclude locale files in moment
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/locale$/,
       contextRegExp: /moment$/,
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser.js',
+      Buffer: ['buffer', 'Buffer'],
     }),
     new CopyPlugin({
       patterns: [
